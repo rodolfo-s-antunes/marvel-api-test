@@ -45,6 +45,7 @@ class Main:
         """
         # First defines the CLI parser to process the program options
         parser = argparse.ArgumentParser(description='Generate HTML pages from Marvel comic Stories.')
+        parser.add_argument('--out', default='out.html', help='Name of the output file (default "out.html").')
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--name', help='Randomly selects a comic from a given character')
         group.add_argument('--id', type=int, help='Selects a specific story ID from Marvel API')
@@ -63,7 +64,7 @@ class Main:
             story_id = args.id
         print('Generating HTML...')
         # Invoke the method to generate the HTML file.
-        self.generateStoryHtml(story_id, 'out.html')
+        self.generateStoryHtml(story_id, args.out)
         print('Done!')
         return
 
