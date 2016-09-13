@@ -41,6 +41,7 @@ class Main:
         return random.choice(char_stories)
 
     def generateStoryHtml(self, story_id, html_file):
+        print('Generating HTML for Story {}'.format(story_id))
         try:
             raw_data = self.api.getStoryData(story_id)
         except ApiCommunicationError as exc:
