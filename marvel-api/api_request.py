@@ -2,13 +2,21 @@
 @author: Rodolfo S. Antunes <rsantunes@inf.ufrgs.br>
 '''
 
-import sys
 import urllib3
 import time
 import hashlib
 import json
 import math
 from configuration import Configuration
+
+class ApiCommunicationError(Exception):
+
+    def __init__(self, message):
+        self.message = message
+        return
+
+    def __str__(self):
+        return self.message
 
 class ApiRequest:
 
@@ -30,42 +38,64 @@ class ApiRequest:
         authparms = self.__addAuthParms(parms);
         request = self.http.request('GET', url, fields=authparms)
         if request.status != 200:
-            print("ERROR: Failed to retrieve data from Marvel, HTTP Status {}".format(request.status))
-            sys.exit(1)
+            raise ApiCommunicationError('Failed to retrieve data from Marvel, HTTP Status {}'.format(request.status))
         else:
             return json.loads( request.data.decode('utf-8') )
 
     def getCharacterId(self, character_name):
-        result = self.__apiRequest('http://gateway.marvel.com/v1/public/characters', {'name': character_name})
+        try:
+            result = self.__apiRequest('http://gateway.marvel.com/v1/public/characters', {'name': character_name})
+        except ApiCommunicationError:
+            raise
         if result['data']['count'] < 1:
-            print("ERROR: No character with the name {} found on Marvel".format(character_name))
-            sys.exit(1)
+            raise ApiCommunicationError('No character with the name {} found'.format(character_name))
         else:
             return result['data']['results'][0]['id']
     
     def getCharacterInfo(self, character_id):
-        result = self.__apiRequest('http://gateway.marvel.com/v1/public/characters/{}'.format(character_id))
+        try:
+            result = self.__apiRequest('http://gateway.marvel.com/v1/public/characters/{}'.format(character_id))
+        except ApiCommunicationError:
+            raise
         return result['data']['results'][0]
     
     def getCharacterInfoFromUrl(self, char_url):
-        result = self.__apiRequest(char_url)
+        try:
+            result = self.__apiRequest(char_url)
+        except ApiCommunicationError:
+            raise
         return result['data']['results'][0]
 
     def getCharacterStories(self, character_id):
         story_ids = list()
         parms = {'limit': '100'}
-        result = self.__apiRequest('http://gateway.marvel.com/v1/public/characters/{}/stories'.format(character_id), parms)
-        total_stories = int(result['data']['total'])
-        total_steps = math.ceil(total_stories/100)
-        for it in range(total_steps):
-            for sit in result['data']['results']:
-                story_ids.append(sit['id'])
-            parms = {'limit': '100', 'offset': str((it+1)*100)}
+        try:
             result = self.__apiRequest('http://gateway.marvel.com/v1/public/characters/{}/stories'.format(character_id), parms)
-        return story_ids
+        except ApiCommunicationError:
+            raise
+        total_stories = int(result['data']['total'])
+        if total_stories < 1:
+            raise ApiCommunicationError('The character ID {} did not return any stories'.format(character_id))
+        else:
+            total_steps = math.ceil(total_stories/100)
+            for it in range(total_steps):
+                for sit in result['data']['results']:
+                    story_ids.append(sit['id'])
+                parms = {'limit': '100', 'offset': str((it+1)*100)}
+                try:
+                    result = self.__apiRequest('http://gateway.marvel.com/v1/public/characters/{}/stories'.format(character_id), parms)
+                except ApiCommunicationError:
+                    raise
+                return story_ids
     
     def getStoryData(self, story_id):
-        result = self.__apiRequest('http://gateway.marvel.com/v1/public/stories/{}'.format(story_id))
-        story_data = result['data']['results'][0]
-        story_data['attributionHTML'] = result['attributionHTML']
-        return story_data
+        try:
+            result = self.__apiRequest('http://gateway.marvel.com/v1/public/stories/{}'.format(story_id))
+        except ApiCommunicationError:
+            raise
+        if int(result['data']['count']) < 1:
+            raise ApiCommunicationError('The story ID {} does not exist'.format(story_id))
+        else:
+            story_data = result['data']['results'][0]
+            story_data['attributionHTML'] = result['attributionHTML']
+            return story_data

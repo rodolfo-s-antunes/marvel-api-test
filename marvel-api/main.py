@@ -4,7 +4,9 @@
 
 import random
 import argparse
-from api_request import ApiRequest
+import sys
+import traceback
+from api_request import ApiRequest, ApiCommunicationError
 from jinja2 import Environment, FileSystemLoader
 
 class Main:
@@ -28,12 +30,22 @@ class Main:
 
 
     def getRandomStoryId(self, character_name):
-        char_id = self.api.getCharacterId(character_name)
-        char_stories = self.api.getCharacterStories(char_id)
+        try:
+            char_id = self.api.getCharacterId(character_name)
+            char_stories = self.api.getCharacterStories(char_id)
+        except ApiCommunicationError as exc:
+            print('ERROR: {}'.format(exc))
+            traceback.print_exc()
+            sys.exit(1)            
         return random.choice(char_stories)
 
     def generateStoryHtml(self, story_id, html_file):
-        raw_data = self.api.getStoryData(story_id)
+        try:
+            raw_data = self.api.getStoryData(story_id)
+        except ApiCommunicationError as exc:
+            print('ERROR: {}'.format(exc))
+            traceback.print_exc()
+            sys.exit(1)
         story_data = self.parseStoryData(raw_data)
         character_data = list()
         for itchar in raw_data['characters']['items']:
