@@ -20,6 +20,7 @@ class Main:
         self.api = ApiRequest()
         if args.name != None:
             print('Looking for a comic from {}...'.format(args.name))
+            print('This may take a while for popular characters!')
             story_id = self.getRandomStoryId(args.name)
         else:
             story_id = args.id

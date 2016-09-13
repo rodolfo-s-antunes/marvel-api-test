@@ -1,28 +1,32 @@
+<!DOCTYPE html>
 <html>
   <head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <title>Marvel Story: {{story_data.title}}</title>
   </head>
   <body>
+  <div class="container">
     <h1>{{story_data.title}}</h1>
-    {% if story_data.description|length > 0 %}
-      <p>Description: {{story_data.description}}</p>
-    {% else %}
-      <p>There is no description provided for this story.</p>
-    {% endif %}
-    {% if story_data.authors|length > 0 %}
-      <p>Authors: {{story_data.authors}}</p>
-    {% endif %}
-    {% if story_data.series|length > 0 %}
-      <p>Series: {{story_data.series}}</p>
-    {% endif %}
-    {% if story_data.events|length > 0 %}
-      <p>Events: {{story_data.events}}</p>
-    {% endif %}
-    <h2>Characters:</h2>
-    {% for char in character_data %}
-      <p>Name: {{char.name}}</p>
-      <img src="{{char.image_url}}" />
-    {% endfor %}
-    <p>{{story_data.attributionHTML}}<p>
+      {% if story_data.description|length > 0 %}
+        <p>Description: {{story_data.description}}</p>
+      {% else %}
+        <p>There is no description provided for this story.</p>
+      {% endif %}
+      {% if story_data.authors|length > 0 %}
+        <p>Authors: {{story_data.authors}}</p>
+      {% endif %}
+      {% if story_data.series|length > 0 %}
+        <p>Series: {{story_data.series}}</p>
+      {% endif %}
+      {% if story_data.events|length > 0 %}
+        <p>Events: {{story_data.events}}</p>
+      {% endif %}
+      <h2>Characters:</h2>
+      {% for char in character_data %}
+        <p>Name: {{char.name}}</p>
+        <img src="{{char.image_url}}" />
+      {% endfor %}
+      <p>{{story_data.attributionHTML}}<p>
+    </div>
   </body>
 </html>
